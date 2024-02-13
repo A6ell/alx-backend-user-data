@@ -12,15 +12,16 @@ class BasicAuth(Auth):
     '''
     a class
     '''
+
     def extract_base64_authorization_header(
             self,
             authorization_header: str
-            ) -> str:
+    ) -> str:
         """ Method to extract the Base64 Authorization header """
         if authorization_header is None:
             return None
 
-        if type(authorization_header) is not str:
+        if not isinstance(authorization_header, str):
             return None
 
         if not authorization_header.startswith('Basic '):
@@ -31,11 +32,11 @@ class BasicAuth(Auth):
     def decode_base64_authorization_header(
             self,
             base64_authorization_header: str
-            ) -> str:
+    ) -> str:
         """ Method to decode the Base64 Authorization header """
         if base64_authorization_header is None:
             return None
-        if type(base64_authorization_header) is not str:
+        if not isinstance(base64_authorization_header, str):
             return None
         try:
             base64_bytes = base64_authorization_header.encode('utf-8')
@@ -47,11 +48,11 @@ class BasicAuth(Auth):
     def extract_user_credentials(
             self,
             decoded_base64_authorization_header: str
-            ) -> (str, str):
+    ) -> (str, str):
         """ Method to extract the user credentials """
         if decoded_base64_authorization_header is None:
             return None, None
-        if type(decoded_base64_authorization_header) is not str:
+        if not isinstance(decoded_base64_authorization_header, str):
             return None, None
         if ':' not in decoded_base64_authorization_header:
             return None, None
@@ -63,9 +64,9 @@ class BasicAuth(Auth):
             self,
             user_email: str,
             user_pwd: str
-            ) -> TypeVar('User'):
+    ) -> TypeVar('User'):
         """ Method to get the User instance based on email and password """
-        if type(user_email) == str and type(user_pwd) == str:
+        if isinstance(user_email, str) and isinstance(user_pwd, str):
             try:
                 users = User.search({'email': user_email})
             except Exception:
@@ -86,12 +87,11 @@ class BasicAuth(Auth):
             self.extract_base64_authorization_header(authorization_header)
         decoded_base64_authorization_header = \
             self.decode_base64_authorization_header(
-                    base64_authorization_header
-                    )
+                base64_authorization_header
+            )
         user_email, user_pwd = \
             self.extract_user_credentials(
-                    decoded_base64_authorization_header
-                    )
+                decoded_base64_authorization_header
+            )
 
         return self.user_object_from_credentials(user_email, user_pwd)
-
