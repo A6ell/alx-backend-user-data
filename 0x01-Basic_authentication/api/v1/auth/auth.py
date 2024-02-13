@@ -12,6 +12,7 @@ class Auth:
     """
     class auth
     """
+
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """ Method to require auth """
         if path is None:
@@ -48,4 +49,3 @@ class Auth:
     def current_user(self, request=None) -> User:
         """ Method to get current user """
         return None
-
