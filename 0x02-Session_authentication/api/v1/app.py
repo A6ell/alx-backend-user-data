@@ -60,11 +60,8 @@ def before_request():
     if auth and auth.require_auth(request.path, authorized_list):
         if not auth.authorization_header(request):
             abort(401)
-        if (auth.authorization_header(request) and
-            not auth.session_cookie(request)):
-            abort(401)
         request.current_user = auth.current_user(request)
-        if not auth.current_user(request):
+        if not request.current_user:
             abort(403)
 
 
@@ -72,3 +69,4 @@ if __name__ == "__main__":
     host = getenv("API_HOST", "0.0.0.0")
     port = getenv("API_PORT", "5000")
     app.run(host=host, port=port)
+
