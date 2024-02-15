@@ -9,8 +9,7 @@ from api.v1.auth.session_auth import SessionAuth
 from api.v1.auth.basic_auth import BasicAuth
 from flask import Flask, jsonify, abort, request
 from flask_cors import (CORS, cross_origin)
-import os
-
+from models.user import User  # Make sure to import the User class
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
@@ -27,42 +26,47 @@ elif getenv("AUTH_TYPE") == "session_auth":
 
 @app.errorhandler(404)
 def not_found(error) -> str:
-    """ Not found handler
-    """
+    """ Not found handler """
     return jsonify({"error": "Not found"}), 404
 
 
 @app.errorhandler(401)
 def unauthorized(error) -> str:
-    """
-    Unauthorized handler.
-    """
+    """ Unauthorized handler """
     return jsonify({"error": "Unauthorized"}), 401
 
 
 @app.errorhandler(403)
 def unauthorized(error) -> str:
-    """
-    Forbidden handler.
-    """
+    """ Forbidden handler """
     return jsonify({"error": "Forbidden"}), 403
 
 
 @app.before_request
 def before_request():
-    """
-    handler before_request
-    """
-    authorized_list = ['/api/v1/status/',
-                       '/api/v1/unauthorized/', '/api/v1/forbidden/',
-                       '/api/v1/auth_session/login/']
+    """ Handler before_request """
+    authorized_list = [
+        '/api/v1/status/',
+        '/api/v1/unauthorized/',
+        '/api/v1/forbidden/',
+        '/api/v1/auth_session/login/'
+    ]
 
     if auth and auth.require_auth(request.path, authorized_list):
         if not auth.authorization_header(request):
             abort(401)
-        request.current_user = auth.current_user(request)
-        if not request.current_user:
+
+        session_cookie = auth.session_cookie(request)
+
+        if not session_cookie:
+            abort(401)
+
+        user_id = auth.user_id_for_session_id(session_cookie)
+
+        if not user_id:
             abort(403)
+
+        request.current_user = User.get(user_id)
 
 
 if __name__ == "__main__":
